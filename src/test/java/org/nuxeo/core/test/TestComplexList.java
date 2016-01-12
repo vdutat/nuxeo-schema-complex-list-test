@@ -57,7 +57,7 @@ public class TestComplexList {
     protected CoreSession session;
 
     @Test
-    public void testResetList() {
+    public void iCanResetListWithNull() {
         DocumentModel doc = session.createDocumentModel(DOCTYPE);
         assertNotNull(doc);
         doc.setPathInfo("/", "mydoc");
@@ -76,8 +76,103 @@ public class TestComplexList {
 
         // set 'stringlist' to null
         map.put(COMPLEX_OBJECT_ELEMENT_PROPNAME, null);
-//        map.replace("stringlist", null);
-//        map.replace("stringlist", new String[] {});
+        propertyValue.set(0, map);
+        doc.setPropertyValue(COMPLEX_LIST_PROPNAME, (Serializable) propertyValue);
+
+        doc = session.saveDocument(doc);
+        session.save();
+        assertNotNull(doc);
+        List<Map<String, Serializable>> propertyValue2 = (List<Map<String, Serializable>>) doc.getPropertyValue(COMPLEX_LIST_PROPNAME);
+        Map<String, Serializable> map2 = propertyValue2.get(0);
+        // This assert is true in 6.0 but false in 7.10
+        assertEquals("'stringlist' should be empty, size", 0, ((String[]) map2.get(COMPLEX_OBJECT_ELEMENT_PROPNAME)).length);
+    }
+
+    @Test
+    public void iCanResetListWithEmptyArray() {
+        DocumentModel doc = session.createDocumentModel(DOCTYPE);
+        assertNotNull(doc);
+        doc.setPathInfo("/", "mydoc");
+        List<Map<String, Serializable>> complexListProp = new ArrayList<>();
+        HashMap<String, Serializable> complexListElem = new HashMap<>();
+        complexListElem.put(COMPLEX_OBJECT_ELEMENT_PROPNAME, new String[] {"string1"});
+        complexListProp.add(complexListElem);
+        doc.setPropertyValue(COMPLEX_LIST_PROPNAME, (Serializable) complexListProp);
+        doc = session.createDocument(doc);
+        session.save();
+        assertNotNull(doc);
+        List<Map<String, Serializable>> propertyValue = (List<Map<String, Serializable>>) doc.getPropertyValue(COMPLEX_LIST_PROPNAME);
+        Map<String, Serializable> map = propertyValue.get(0);
+        assertEquals(1, ((String[]) map.get(COMPLEX_OBJECT_ELEMENT_PROPNAME)).length);
+        assertEquals("string1", ((String[]) map.get(COMPLEX_OBJECT_ELEMENT_PROPNAME))[0]);
+
+        // set 'stringlist' to an empty array
+        propertyValue = (List<Map<String, Serializable>>) doc.getPropertyValue(COMPLEX_LIST_PROPNAME);
+        map = propertyValue.get(0);
+        map.put(COMPLEX_OBJECT_ELEMENT_PROPNAME, new String[] {});
+        propertyValue.set(0, map);
+        doc.setPropertyValue(COMPLEX_LIST_PROPNAME, (Serializable) propertyValue);
+        doc = session.saveDocument(doc);
+        session.save();
+        assertNotNull(doc);
+        List<Map<String, Serializable>>propertyValue2 = (List<Map<String, Serializable>>) doc.getPropertyValue(COMPLEX_LIST_PROPNAME);
+        Map<String, Serializable>map2 = propertyValue2.get(0);
+        // This assert is true in 6.0 but false in 7.10
+        assertEquals("'stringlist' should be empty, size", 0, ((String[]) map2.get(COMPLEX_OBJECT_ELEMENT_PROPNAME)).length);
+    }
+
+    @Test
+    public void iCanResetListResetMultiValuedComplexProperty() {
+        DocumentModel doc = session.createDocumentModel(DOCTYPE);
+        assertNotNull(doc);
+        doc.setPathInfo("/", "mydoc");
+        List<Map<String, Serializable>> complexListProp = new ArrayList<>();
+        HashMap<String, Serializable> complexListElem = new HashMap<>();
+        complexListElem.put(COMPLEX_OBJECT_ELEMENT_PROPNAME, new String[] {"string1"});
+        complexListProp.add(complexListElem);
+        doc.setPropertyValue(COMPLEX_LIST_PROPNAME, (Serializable) complexListProp);
+        doc = session.createDocument(doc);
+        session.save();
+        assertNotNull(doc);
+        List<Map<String, Serializable>> propertyValue = (List<Map<String, Serializable>>) doc.getPropertyValue(COMPLEX_LIST_PROPNAME);
+        Map<String, Serializable> map = propertyValue.get(0);
+        assertEquals(1, ((String[]) map.get(COMPLEX_OBJECT_ELEMENT_PROPNAME)).length);
+        assertEquals("string1", ((String[]) map.get(COMPLEX_OBJECT_ELEMENT_PROPNAME))[0]);
+
+        List<Map<String, Serializable>> newComplexListProp = new ArrayList<>();
+        HashMap<String, Serializable> newComplexListElem = new HashMap<>();
+        newComplexListElem.put(COMPLEX_OBJECT_ELEMENT_PROPNAME, new String[]{});
+        newComplexListProp.add(newComplexListElem);
+        doc.setPropertyValue(COMPLEX_LIST_PROPNAME, (Serializable) newComplexListProp);
+
+        doc = session.saveDocument(doc);
+        session.save();
+        assertNotNull(doc);
+        List<Map<String, Serializable>> propertyValue2 = (List<Map<String, Serializable>>) doc.getPropertyValue(COMPLEX_LIST_PROPNAME);
+        Map<String, Serializable> map2 = propertyValue2.get(0);
+        // This assert is true in 6.0 but false in 7.10
+        assertEquals("'stringlist' should be empty, size", 0, ((String[]) map2.get(COMPLEX_OBJECT_ELEMENT_PROPNAME)).length);
+    }
+
+    @Test
+    public void iCanModifyList() {
+        DocumentModel doc = session.createDocumentModel(DOCTYPE);
+        assertNotNull(doc);
+        doc.setPathInfo("/", "mydoc");
+        List<Map<String, Serializable>> complexListProp = new ArrayList<>();
+        HashMap<String, Serializable> complexListElem = new HashMap<>();
+        complexListElem.put(COMPLEX_OBJECT_ELEMENT_PROPNAME, new String[] {"string1"});
+        complexListProp.add(complexListElem);
+        doc.setPropertyValue(COMPLEX_LIST_PROPNAME, (Serializable) complexListProp);
+        doc = session.createDocument(doc);
+        session.save();
+        assertNotNull(doc);
+        List<Map<String, Serializable>> propertyValue = (List<Map<String, Serializable>>) doc.getPropertyValue(COMPLEX_LIST_PROPNAME);
+        Map<String, Serializable> map = propertyValue.get(0);
+        assertEquals(1, ((String[]) map.get(COMPLEX_OBJECT_ELEMENT_PROPNAME)).length);
+        assertEquals("string1", ((String[]) map.get(COMPLEX_OBJECT_ELEMENT_PROPNAME))[0]);
+
+        map.replace("stringlist", new String[] {"string2"});
         propertyValue.set(0, map);
         doc.setPropertyValue(COMPLEX_LIST_PROPNAME, (Serializable) propertyValue);
         doc = session.saveDocument(doc);
@@ -85,9 +180,74 @@ public class TestComplexList {
         assertNotNull(doc);
         List<Map<String, Serializable>> propertyValue2 = (List<Map<String, Serializable>>) doc.getPropertyValue(COMPLEX_LIST_PROPNAME);
         Map<String, Serializable> map2 = propertyValue2.get(0);
-        assertEquals("'stringlist' should be empty,", 0, ((String[]) map2.get(COMPLEX_OBJECT_ELEMENT_PROPNAME)).length);
+        assertEquals("'stringlist' should contain 1 element1,", 1, ((String[]) map2.get(COMPLEX_OBJECT_ELEMENT_PROPNAME)).length);
+        assertEquals("string2", ((String[]) map2.get(COMPLEX_OBJECT_ELEMENT_PROPNAME))[0]);
+    }
 
+    @Test
+    public void iCanModifyListMoreItems() {
+        DocumentModel doc = session.createDocumentModel(DOCTYPE);
+        assertNotNull(doc);
+        doc.setPathInfo("/", "mydoc");
+        List<Map<String, Serializable>> complexListProp = new ArrayList<>();
+        HashMap<String, Serializable> complexListElem = new HashMap<>();
+        complexListElem.put(COMPLEX_OBJECT_ELEMENT_PROPNAME, new String[] {"string1"});
+        complexListProp.add(complexListElem);
+        doc.setPropertyValue(COMPLEX_LIST_PROPNAME, (Serializable) complexListProp);
+        doc = session.createDocument(doc);
+        session.save();
+        assertNotNull(doc);
+        List<Map<String, Serializable>> propertyValue = (List<Map<String, Serializable>>) doc.getPropertyValue(COMPLEX_LIST_PROPNAME);
+        Map<String, Serializable> map = propertyValue.get(0);
+        assertEquals(1, ((String[]) map.get(COMPLEX_OBJECT_ELEMENT_PROPNAME)).length);
+        assertEquals("string1", ((String[]) map.get(COMPLEX_OBJECT_ELEMENT_PROPNAME))[0]);
 
+        // replace 'stringlist' with an empty array
+        map.replace("stringlist", new String[] {"string2", "string3"});
+        propertyValue.set(0, map);
+        doc.setPropertyValue(COMPLEX_LIST_PROPNAME, (Serializable) propertyValue);
+        doc = session.saveDocument(doc);
+        session.save();
+        assertNotNull(doc);
+        List<Map<String, Serializable>> propertyValue2 = (List<Map<String, Serializable>>) doc.getPropertyValue(COMPLEX_LIST_PROPNAME);
+        Map<String, Serializable> map2 = propertyValue2.get(0);
+        // This assert is true in 6.0 but false in 7.10
+        assertEquals("'stringlist' should contain 2 elements,", 2, ((String[]) map2.get(COMPLEX_OBJECT_ELEMENT_PROPNAME)).length);
+        assertEquals("string2", ((String[]) map2.get(COMPLEX_OBJECT_ELEMENT_PROPNAME))[0]);
+        assertEquals("string3", ((String[]) map2.get(COMPLEX_OBJECT_ELEMENT_PROPNAME))[1]);
+    }
+
+    @Test
+    public void iCanModifyListLessItems() {
+        DocumentModel doc = session.createDocumentModel(DOCTYPE);
+        assertNotNull(doc);
+        doc.setPathInfo("/", "mydoc");
+        List<Map<String, Serializable>> complexListProp = new ArrayList<>();
+        HashMap<String, Serializable> complexListElem = new HashMap<>();
+        complexListElem.put(COMPLEX_OBJECT_ELEMENT_PROPNAME, new String[] {"string1", "string3"});
+        complexListProp.add(complexListElem);
+        doc.setPropertyValue(COMPLEX_LIST_PROPNAME, (Serializable) complexListProp);
+        doc = session.createDocument(doc);
+        session.save();
+        assertNotNull(doc);
+        List<Map<String, Serializable>> propertyValue = (List<Map<String, Serializable>>) doc.getPropertyValue(COMPLEX_LIST_PROPNAME);
+        Map<String, Serializable> map = propertyValue.get(0);
+        assertEquals(2, ((String[]) map.get(COMPLEX_OBJECT_ELEMENT_PROPNAME)).length);
+        assertEquals("string1", ((String[]) map.get(COMPLEX_OBJECT_ELEMENT_PROPNAME))[0]);
+        assertEquals("string3", ((String[]) map.get(COMPLEX_OBJECT_ELEMENT_PROPNAME))[1]);
+
+        // replace 'stringlist' with an empty array
+        map.replace("stringlist", new String[] {"string2"});
+        propertyValue.set(0, map);
+        doc.setPropertyValue(COMPLEX_LIST_PROPNAME, (Serializable) propertyValue);
+        doc = session.saveDocument(doc);
+        session.save();
+        assertNotNull(doc);
+        List<Map<String, Serializable>> propertyValue2 = (List<Map<String, Serializable>>) doc.getPropertyValue(COMPLEX_LIST_PROPNAME);
+        Map<String, Serializable> map2 = propertyValue2.get(0);
+        // This assert is true in 6.0 but false in 7.10
+        assertEquals("'stringlist' should contain 1 element,", 1, ((String[]) map2.get(COMPLEX_OBJECT_ELEMENT_PROPNAME)).length);
+        assertEquals("string2", ((String[]) map2.get(COMPLEX_OBJECT_ELEMENT_PROPNAME))[0]);
     }
 
 }
