@@ -141,7 +141,8 @@ public class TestComplexList {
 
         List<Map<String, Serializable>> newComplexListProp = new ArrayList<>();
         HashMap<String, Serializable> newComplexListElem = new HashMap<>();
-        newComplexListElem.put(COMPLEX_OBJECT_ELEMENT_PROPNAME, new String[]{});
+//        newComplexListElem.put(COMPLEX_OBJECT_ELEMENT_PROPNAME, new String[]{});
+        newComplexListElem.put(COMPLEX_OBJECT_ELEMENT_PROPNAME, null);
         newComplexListProp.add(newComplexListElem);
         doc.setPropertyValue(COMPLEX_LIST_PROPNAME, (Serializable) newComplexListProp);
 
@@ -202,7 +203,6 @@ public class TestComplexList {
         assertEquals(1, ((String[]) map.get(COMPLEX_OBJECT_ELEMENT_PROPNAME)).length);
         assertEquals("string1", ((String[]) map.get(COMPLEX_OBJECT_ELEMENT_PROPNAME))[0]);
 
-        // replace 'stringlist' with an empty array
         map.replace("stringlist", new String[] {"string2", "string3"});
         propertyValue.set(0, map);
         doc.setPropertyValue(COMPLEX_LIST_PROPNAME, (Serializable) propertyValue);
@@ -211,7 +211,6 @@ public class TestComplexList {
         assertNotNull(doc);
         List<Map<String, Serializable>> propertyValue2 = (List<Map<String, Serializable>>) doc.getPropertyValue(COMPLEX_LIST_PROPNAME);
         Map<String, Serializable> map2 = propertyValue2.get(0);
-        // This assert is true in 6.0 but false in 7.10
         assertEquals("'stringlist' should contain 2 elements,", 2, ((String[]) map2.get(COMPLEX_OBJECT_ELEMENT_PROPNAME)).length);
         assertEquals("string2", ((String[]) map2.get(COMPLEX_OBJECT_ELEMENT_PROPNAME))[0]);
         assertEquals("string3", ((String[]) map2.get(COMPLEX_OBJECT_ELEMENT_PROPNAME))[1]);
@@ -236,7 +235,6 @@ public class TestComplexList {
         assertEquals("string1", ((String[]) map.get(COMPLEX_OBJECT_ELEMENT_PROPNAME))[0]);
         assertEquals("string3", ((String[]) map.get(COMPLEX_OBJECT_ELEMENT_PROPNAME))[1]);
 
-        // replace 'stringlist' with an empty array
         map.replace("stringlist", new String[] {"string2"});
         propertyValue.set(0, map);
         doc.setPropertyValue(COMPLEX_LIST_PROPNAME, (Serializable) propertyValue);
@@ -245,7 +243,6 @@ public class TestComplexList {
         assertNotNull(doc);
         List<Map<String, Serializable>> propertyValue2 = (List<Map<String, Serializable>>) doc.getPropertyValue(COMPLEX_LIST_PROPNAME);
         Map<String, Serializable> map2 = propertyValue2.get(0);
-        // This assert is true in 6.0 but false in 7.10
         assertEquals("'stringlist' should contain 1 element,", 1, ((String[]) map2.get(COMPLEX_OBJECT_ELEMENT_PROPNAME)).length);
         assertEquals("string2", ((String[]) map2.get(COMPLEX_OBJECT_ELEMENT_PROPNAME))[0]);
     }
